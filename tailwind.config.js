@@ -4,6 +4,7 @@ import {nextui} from '@nextui-org/theme'
 module.exports = {
   content: [
     './components/**/*.{js,ts,jsx,tsx,mdx}',
+	'./library/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
     './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}'
   ],
@@ -50,6 +51,7 @@ module.exports = {
   			}
   		},
   		fontFamily: {
+			custom: ['Barnabus', 'sans-serif'], // Replace with your font name
   			sans: ["var(--font-sans)"],
   			mono: ["var(--font-mono)"]
   		},

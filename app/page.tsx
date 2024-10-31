@@ -1,57 +1,85 @@
 'use client'
+import InviteSheet from '@/library/InviteSheet'
+import DiwaliFragment_2 from '@/library/Themes/Diwali/DiwaliFragment_2'
 import React, { useEffect, useState } from 'react'
-import element_1 from '../public/Deewali/element_1.png'
-import element_2 from '../public/Deewali/element_2.png'
-import Glowing_Rolloing from '../public/Deewali/Glowing-Rolloing.png'
-import Lamp from '../public/Deewali/Lamp.png'
-import Image from 'next/image'
-import Lottie from "lottie-react";
-import { RainbowButton } from '@/components/ui/rainbow-button'
-import MobileTheme from './Themes/Diwali/MobileTheme'
-import ThemeFragment from './Themes/Diwali/ThemeFragment'
+import {Cinzel_Decorative} from 'next/font/google'
+import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure} from "@nextui-org/react";
+import { useSearchParams } from 'next/navigation'
+import { diwaliWishes } from '@/library/Themes/Diwali/wishe'
+import { Suspense } from 'react';
 
+const Cinzel = Cinzel_Decorative({
+  weight:['400'],
+  subsets:["latin"],
+  display:'auto'
+})
 function page() {
-  const [music, setMusic] = useState<HTMLAudioElement | null>(null);
-  const [sfx, setSfx] = useState<HTMLAudioElement | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const params = useSearchParams()
+  const [Greeting,setGreeting] = useState('')
+  const {isOpen, onOpen, onOpenChange} = useDisclosure();
 
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 600);
-    };
-
-    handleResize(); // Check screen size on mount
-    window.addEventListener('resize', handleResize);
-
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const audio = new Audio('/Deewali/music.mp3');
-      setMusic(audio);
-      audio.play().catch((error) => {
-        console.error("Autoplay failed:", error);
-      });
+  function getPersonalizedDiwaliWish(wish:number, sender:string, receiver = "") {
+    let wishTemplate = diwaliWishes[wish];
+    wishTemplate = wishTemplate.replace("{sender}", sender);
+    if (receiver) {
+      wishTemplate = wishTemplate.replace("{receiver}", receiver);
+    } else {
+      wishTemplate = wishTemplate.replace("{receiver}, ", "");
     }
-  }, []);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const audio = new Audio('/Deewali/sfx.mp3');
-      setSfx(audio);
-      const intervalId = setInterval(() => {
-        audio.play().catch((error) => {
-          console.error("Error playing audio:", error);
-        });
-      }, 2600);
-      return () => {
-        clearInterval(intervalId);
-      };
+    return wishTemplate;
+  }
+  useEffect(()=>{
+    if(params){
+      const personName = params?.get('personName') as string
+      const wish = params?.get('wish') as string
+      const participant = params?.get('participant') as string
+      if(wish){
+        const getWish = getPersonalizedDiwaliWish(parseInt(wish),personName,participant)
+        if(personName && wish){
+          setGreeting(getWish)
+          onOpen()
+        }
+      }
     }
-  }, []);
+  },[])
 
-  return isMobile ? <MobileTheme/> : <ThemeFragment/>
+  return (
+    <DiwaliFragment_2>
+       <div className='absolute flex w-full h-full justify-center items-center'>
+       <Modal 
+        classNames={{
+          backdrop: "backdrop-blur-md bg-gradient-to-t from-orange-900 to-zinc-900/10  backdrop-opacity-20"
+        }}
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        >
+        <ModalContent className="bg-transparent bg-cover sm:bg-cover bg-no-repeat bg-[url('/Themes/Diwali/ic_wsh.jpg')]">
+          {(onClose) => (
+            <>
+              <ModalHeader>
+
+              </ModalHeader>
+              <ModalBody className='my-auto text-[#ffecae] flex justify-center items-center'>
+                <span className='h-32'></span>
+                <span className={`text-center sm:pt-8 text-xs ${Cinzel.className}`}>
+                  {
+                    Greeting ? Greeting : 'no Greetings !'
+                  }
+                </span>
+              </ModalBody>
+              <ModalFooter>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+      </div>
+      <div className='m-5 flex w-full sm:justify-end justify-center items-end sm:items-start mb-32'>
+        <InviteSheet/>
+      </div>
+    </DiwaliFragment_2>
+  )
 }
 
 export default page
+
